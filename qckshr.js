@@ -41,6 +41,6 @@ function addFile(req) {
   } else {return {error:'NO FILE. NO UPLOAD.'}}
 }
 function findFile(md5) {return files.find((f)=>{return f.md5==md5})}
-function deleteFile(md5) {files=files.filter((f)=>{return f.md5!==md5})}
+function deleteFile(md5) {let file=files.find((f)=>{return f.md5==md5}); if (file) {files=files.filter((f)=>{return f.md5!==md5}); hook.trigger('[QCKSHR] DELETE',file);}}
 function getObjWithoutData(o) {return {name:o.name,size:o.size,mimetype:o.mimetype,md5:o.md5,idle:new Date().getTime()-o.time}}
 function getSize() {return files.reduce((a,c)=>{return a+c.size},0)}

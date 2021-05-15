@@ -28,11 +28,36 @@
 			* {font-size: 1.1rem}
 		}
 	</style>
+	<script type="text/javascript" src="index.config.json"></script>
 	<script type="text/javascript">
 		const MB=1024*1024;
 		var maxFilesize=0;
 
 		document.addEventListener("visibilitychange", function() {if (!document.hidden) {updateInfo()}});
+
+		var socket=false;
+		var useSocketIO=true;
+
+		function loadScript(src, done) {
+			var js = document.createElement('script');
+			js.src = src;
+			js.onload = function() {done(src+' executed')};
+			document.head.appendChild(js);
+		}
+
+		if (useSocketIO) {setTimeout(function(){SocketIO()},0)};
+		function SocketIO() {
+			var config = JSON.parse(configJSON);
+			if (!socket) {loadScript(config.socket_server_URL+'/socket.io/socket.io.js', function() {
+				socket=io(config.socket_server_URL);
+				socket.on('connect', function () {socket.emit('join',['qckshr'])});
+				socket.on('message', function (msg,meta) {
+					console.log(msg);
+					updateInfo();
+				});
+				socket.on('disconnect', function (msg) {console.log('CONNECTION CLOSED')})
+			})
+		}};
 
 		function ajax(url,callback) {
 			var xmlhttp=null;
