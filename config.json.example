@@ -1,0 +1,5 @@
+{
+  "socket_server_URL" : "https://your.domain.here/your.path.to.socketio",
+  "qckshr_name" : "qckshr",
+  "qckshr_rooms" : ["qckshr"]
+}
