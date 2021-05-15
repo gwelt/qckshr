@@ -12,18 +12,17 @@
 		div {border-radius:0.4rem;}
 		img {height:1.2rem;border-style:none;}
 		#main {min-width:300px; max-width:800px;margin:auto;word-break:break-word;padding:1rem;}
-		#dropContainer {cursor:pointer; border:4px dashed #5e5e5e; padding:2rem; text-align:center;}
-		#dropContainer:hover {}
-		#response {background-color:#8acff7;margin:1rem 0 1rem 0; padding:2rem; text-align:center}
-		#info {background-color:#f2f2f2;margin:0.5rem 0 0.5rem 0;}
-		.hint {font-size:0.8rem; margin-top:0.8rem;}
-		.nofileitem {margin:0.5rem 0 0.5rem 0;padding:0.5rem;}
-		.fileitem {background-color:#e2e2e2;margin:0.5rem 0 0.5rem 0;padding:1rem;display:flex;justify-content:flex-start;} /**/
-		.filedescription {margin-right:1.5rem; width:90%;}
-		.actionicon_container {width:10%;display:flex;justify-content:space-around;}
-		.actionicon {}
-		.abig {font-weight:bold;font-size:1.2rem}
-		.bignumber {font-weight:bold; font-size:2rem; padding-bottom:0.5rem; color:#002492;}
+		#dropContainer {font-weight:bold; cursor:pointer; border:4px dashed #5e5e5e; padding:2rem; text-align:center;}
+		.bignumber {font-weight:bold; font-size:2rem; padding-bottom:0.5rem; color:#3e3e3e;}
+		.hint {font-size:0.8rem;margin-top:0.25rem}
+		#response {background-color:#aee1ff; margin:1.5rem 0 1.5rem 0; padding:2rem; text-align:center}
+		a.biglink {font-weight:bold;font-size:1.2rem}
+		div.biglink {margin:1rem 0 0.5rem 0;}
+		#info {background-color:#f2f2f2;margin:1.5rem 0 1.5rem 0;}
+		.fileitem {background-color:#ffffff;margin:0.75rem 0 0.75rem 0;padding:0;width:100%;display:flex;justify-content:flex-start;}
+		.filedescription {padding:1rem; margin-right:0; width:100%}
+		.actionicon {cursor:pointer; min-width:15%; padding:2rem; border-radius:0 0.4rem 0.4rem 0; background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNOSAxOWMwIC41NTItLjQ0OCAxLTEgMXMtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMXMxIC40NDggMSAxdjEwem00IDBjMCAuNTUyLS40NDggMS0xIDFzLTEtLjQ0OC0xLTF2LTEwYzAtLjU1Mi40NDgtMSAxLTFzMSAuNDQ4IDEgMXYxMHptNCAwYzAgLjU1Mi0uNDQ4IDEtMSAxcy0xLS40NDgtMS0xdi0xMGMwLS41NTIuNDQ4LTEgMS0xczEgLjQ0OCAxIDF2MTB6bTUtMTd2MmgtMjB2LTJoNS43MTFjLjkgMCAxLjYzMS0xLjA5OSAxLjYzMS0yaDUuMzE1YzAgLjkwMS43MyAyIDEuNjMxIDJoNS43MTJ6bS0zIDR2MTZoLTE0di0xNmgtMnYxOGgxOHYtMThoLTJ6Ii8+PC9zdmc+") no-repeat center;}
+		.actionicon:hover {background-color:#ff8686;}
 		@media only screen and (min-width: 768px) {
 			#main {min-width:640px; max-width:1200px;margin:auto;word-break:break-word;padding:2rem;}
 			* {font-size: 1.1rem}
@@ -31,7 +30,6 @@
 
 	</style>
 	<script type="text/javascript">
-		const trashicon='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNOSAxOWMwIC41NTItLjQ0OCAxLTEgMXMtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMXMxIC40NDggMSAxdjEwem00IDBjMCAuNTUyLS40NDggMS0xIDFzLTEtLjQ0OC0xLTF2LTEwYzAtLjU1Mi40NDgtMSAxLTFzMSAuNDQ4IDEgMXYxMHptNCAwYzAgLjU1Mi0uNDQ4IDEtMSAxcy0xLS40NDgtMS0xdi0xMGMwLS41NTIuNDQ4LTEgMS0xczEgLjQ0OCAxIDF2MTB6bTUtMTd2MmgtMjB2LTJoNS43MTFjLjkgMCAxLjYzMS0xLjA5OSAxLjYzMS0yaDUuMzE1YzAgLjkwMS43MyAyIDEuNjMxIDJoNS43MTJ6bS0zIDR2MTZoLTE0di0xNmgtMnYxOGgxOHYtMThoLTJ6Ii8+PC9zdmc+';
 		const MB=1024*1024;
 		var maxFilesize=0;
 
@@ -58,7 +56,7 @@
 	                var done = e.position || e.loaded, total = e.totalSize || e.total;
 	                console.log(filename+' upload progress: ' + done + ' / ' + total + ' = ' + (Math.floor(done/total*1000)/10) + '%');
 	                progress((Math.floor(done/total*1000)/10),filename);
-	                if (total>maxFilesize) {xhr.abort(); update(); alert('Filesize is '+(total/MB).toFixed(2)+' MB, but must not exceed '+(maxFilesize/MB).toFixed(0)+' MB!');}
+	                if (total>maxFilesize) {xhr.abort(); update(); alert('Filesize is '+(total/MB).toFixed(2)+'MB, but must not exceed '+(maxFilesize/MB).toFixed(0)+'MB!');}
 	            };
 	        }
 	        xhr.onreadystatechange = function(e) {
@@ -84,7 +82,7 @@
 			let e=document.getElementById('response');
 			try {r=JSON.parse(r||'{}')} catch(e){alert('ERROR: '+r);r=undefined};
 			if (r&&r.md5) {
-				let h='<a onclick=setTimeout(function(){update()},1000); href='+r.md5+'>'+r.name+'</a> ('+getSizeHR(r.size)+') can now be downloaded once (!) using this link:<br><br><span style=font-weight:bold;font-size:1.2rem><a class=abig onclick=setTimeout(function(){update()},1000); href='+r.md5+'>'+location.href+r.md5+'</a></span>';
+				let h='One-Time-Link for '+r.name+' ('+getSizeHR(r.size)+')<div class=biglink><a class=biglink onclick=setTimeout(function(){update()},1000); href='+r.md5+'>'+location.href+r.md5+'</a></div>';
 				e.innerHTML=h;
 				e.style.display='block';
 			} else {e.style.display='none';if (r&&r.error) {alert(r.error)}}
@@ -95,16 +93,16 @@
 			ajax('info',(r)=>{
 				r=JSON.parse(r);
 				maxFilesize=r.maxFilesize||0;
-				document.getElementById('info').innerHTML=(r.filelist.length?'<div class=nofileitem>Files waiting for download:</div>':'')+r.filelist.reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
+				document.getElementById('info').innerHTML=r.filelist.reverse().reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
 				let dc=document.getElementById('dropContainer');
-				dc.innerHTML='click<br>or<br>drag &amp; drop your file here<br><div class=hint>(maximum filesize '+(maxFilesize/MB).toFixed(0)+' MB)</div>';
+				dc.innerHTML='click or drag &amp; drop<br>your file here<div class=hint><br>maximum filesize '+(maxFilesize/MB).toFixed(0)+'MB</div>';
 				dc.style.backgroundColor='#ffffff';
 				dc.style.border='4px dashed #b3b3b3';
 			})
 		}
 
 		function getFileDetailsHTML(f) {
-			return '<div class=fileitem><div class=filedescription><a onclick=setTimeout(function(){update()},1000); href='+f.md5+'>'+f.name+'</a> | '+getSizeHR(f.size)+' | <!--'+f.md5+' | -->idle '+(f.idle/1000/60).toFixed(0)+' minutes</div><div class=actionicon_container><div class=actionicon><a href="javascript:void(0);" onclick=deleteFile("'+f.md5+'")><img src='+trashicon+'></a></div></div></div>';
+			return '<div class=fileitem><div class=filedescription><a onclick=setTimeout(function(){update()},1000); href='+f.md5+'>'+f.name+'</a><div class=hint>'+getSizeHR(f.size)+' | idle '+(f.idle/1000/60).toFixed(0)+' minutes</div></div><div class=actionicon onclick=deleteFile("'+f.md5+'")></div></div>';
 		}
 
 		function deleteFile(md5) {
@@ -114,7 +112,7 @@
 
 		function getSizeHR(size) {
 			let KB=size/1024;
-			return (KB<1000)?KB.toFixed(0)+' KB':(KB/1024).toFixed(1)+ 'MB';
+			return (KB<1000)?KB.toFixed(0)+'KB':(KB/1024).toFixed(1)+'MB';
 		}
 
 		function progress(p,filename) {
