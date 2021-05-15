@@ -6,6 +6,8 @@ const PORT = 3011;
 const MB=1024*1024;
 const maxDBsize=150*MB;
 const maxFilesize=100*MB;
+const Hook = require('./hook.js');
+var hook = new Hook();
 
 app.use(fileUpload({limits:{fileSize:maxFilesize+1}}));
 app.use('(/qckshr)?/', express.static(__dirname + '/public'));
@@ -20,6 +22,7 @@ app.use('(/qckshr)?/:id', function(req, res) {
     res.set('Content-Type', f.mimetype);
     res.send(f.data);
     deleteFile(f.md5);
+    hook.trigger('[QCKSHR] DOWNLOAD',f);
   } else {res.status(404).send('File not found');}
 })
 app.listen(PORT, function() {console.log('QCKSHR* listening on port', PORT)});
@@ -32,6 +35,7 @@ function addFile(req) {
       req.files.file.time=new Date().getTime();
       files.push(req.files.file);
       while (getSize()>maxDBsize) {files.shift()}
+      hook.trigger('[QCKSHR] UPLOAD',req.files.file);
       return getObjWithoutData(req.files.file);
     } else {return {error:'Filesize must not exceed '+(maxFilesize/MB).toFixed(2)+' MB!'}}
   } else {return {error:'NO FILE. NO UPLOAD.'}}
