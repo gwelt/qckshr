@@ -32,6 +32,8 @@
 		const MB=1024*1024;
 		var maxFilesize=0;
 
+		document.addEventListener("visibilitychange", function() {if (!document.hidden) {updateInfo()}});
+
 		function ajax(url,callback) {
 			var xmlhttp=null;
 			if (window.XMLHttpRequest) {xmlhttp=new XMLHttpRequest()} else {xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")};
