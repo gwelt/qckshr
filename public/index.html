@@ -31,28 +31,37 @@
 	<script type="text/javascript">
 		const MB=1024*1024;
 		var maxFilesize=0;
+		var socketData={};
 
 		document.addEventListener("visibilitychange", function() {if (!document.hidden) {updateInfo()}});
 
 		function loadScript(src, done) {
 			var js = document.createElement('script');
 			js.src = src;
-			js.onload = function() {done(src+' executed')};
+			js.onload = function() {done()};
 			document.head.appendChild(js);
 		}
 
-		var socket=false;
 		function SocketIO(socket_server_URL,qckshr_rooms) {
-			if (!socket) {loadScript(socket_server_URL+'/socket.io/socket.io.js', function() {
-				socket=io(socket_server_URL);
-				socket.on('connect', function () {socket.emit('join',qckshr_rooms)});
+			if (socket_server_URL) {socketData.socket_server_URL=socket_server_URL};
+			if (qckshr_rooms) {socketData.qckshr_rooms=qckshr_rooms};
+			if (!socketData.socketLoaded && socketData.socket_server_URL && socketData.qckshr_rooms) {
+				loadScript(socketData.socket_server_URL+'/socket.io/socket.io.js', function() {socketData.socketLoaded=true; console.log('===SOCKET.IO LOADED==='); socketStart()})
+			} else {
+				socketStart();
+			}
+		}
+		function socketStart() {
+			if (socketData.socketLoaded==true) {
+				socket=io(socketData.socket_server_URL);
+				socket.on('connect', function () {socket.emit('join',socketData.qckshr_rooms); console.log('===SOCKET CONNECTED===');});
 				socket.on('message', function (msg,meta) {
-					console.log(msg,meta);
+					console.log(msg);
 					if (meta) {updateInfo()};
 				});
-				socket.on('disconnect', function (msg) {console.log('CONNECTION CLOSED')})
-			})
-		}};
+				socket.on('disconnect', function (msg) {console.log('===SOCKET CONNECTION CLOSED===')})
+			} else {console.log('===SOCKET FAILED===');}
+		}
 
 		function ajax(url,callback) {
 			var xmlhttp=null;
@@ -88,16 +97,23 @@
 			xhr.send(formData);
 		}	
 
+		function updateAfterDownload() {
+			setTimeout(function(){
+				SocketIO(); // has to be reconnected after a href-download (bug?)
+				update();
+			},500)
+		}
+
 		function update(response) {
 			updateResponse(response);
-			if (!socket || (socket&&!socket.connected)) {updateInfo()};
+			updateInfo();
 		}
 
 		function updateResponse(r) {
 			let e=document.getElementById('response');
 			try {r=JSON.parse(r||'{}')} catch(e){alert('ERROR: '+r);r=undefined};
 			if (r&&r.md5) {
-				let h='One-Time-Link for '+r.name+' ('+getSizeHR(r.size)+')<div class=biglink><a class=biglink onclick=setTimeout(function(){update()},1000); href='+r.md5+'>'+location.href+r.md5+'</a></div>';
+				let h='One-Time-Link for '+r.name+' ('+getSizeHR(r.size)+')<div class=biglink><a class=biglink onclick=updateAfterDownload(); href='+r.md5+'>'+location.href+r.md5+'</a></div>';
 				e.innerHTML=h;
 				e.style.display='block';
 			} else {e.style.display='none';if (r&&r.error) {alert(r.error)}}
@@ -107,8 +123,7 @@
 			document.getElementById('info').innerHTML='';
 			ajax('info',(r)=>{
 				r=JSON.parse(r);
-				console.log(r);
-				if (!socket && r.socket_server_URL!==undefined && r.qckshr_rooms!==undefined) {SocketIO(r.socket_server_URL,r.qckshr_rooms)}
+				if (!socketData.socketLoaded && r.socket_server_URL!==undefined && r.qckshr_rooms!==undefined) {SocketIO(r.socket_server_URL,r.qckshr_rooms)}
 				maxFilesize=r.maxFilesize||0;
 				document.getElementById('dropContainer').innerHTML='click or drag &amp; drop<br>your file here<div class=hint><br>maximum filesize '+(maxFilesize/MB).toFixed(0)+'MB</div>';
 				document.getElementById('info').innerHTML=r.filelist.reverse().reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
@@ -116,7 +131,7 @@
 		}
 
 		function getFileDetailsHTML(f) {
-			return '<div class=fileitem><div class=filedescription><a onclick=setTimeout(function(){update()},1000); href='+f.md5+'>'+f.name+'</a><div class=hint>'+getSizeHR(f.size)+' | idle '+(f.idle/1000/60).toFixed(0)+' minutes</div></div><div class=actionicon onclick=deleteFile("'+f.md5+'")></div></div>';
+			return '<div class=fileitem><div class=filedescription><a onclick=updateAfterDownload(); href='+f.md5+'>'+f.name+'</a><div class=hint>'+getSizeHR(f.size)+' | idle '+(f.idle/1000/60).toFixed(0)+' minutes</div></div><div class=actionicon onclick=deleteFile("'+f.md5+'")></div></div>';
 		}
 
 		function deleteFile(md5) {

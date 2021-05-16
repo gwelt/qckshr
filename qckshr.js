@@ -22,8 +22,7 @@ app.use('(/qckshr)?/:id', function(req, res) {
     res.set('Content-disposition', 'attachment; filename=' + f.name);
     res.set('Content-Type', f.mimetype);
     res.send(f.data);
-    deleteFile(f.md5);
-    hook.trigger('[QCKSHR] DOWNLOAD',f);
+    deleteFile(f.md5,true);
   } else {res.status(404).send('File not found');}
 })
 app.listen(PORT, function() {console.log('QCKSHR* listening on port '+PORT)});
@@ -36,12 +35,12 @@ function addFile(req) {
       req.files.file.time=new Date().getTime();
       files.push(req.files.file);
       while (getSize()>maxDBsize) {files.shift()}
-      hook.trigger('[QCKSHR] UPLOAD',req.files.file);
+      hook.trigger('UPLOAD',req.files.file);
       return getObjWithoutData(req.files.file);
     } else {return {error:'Filesize must not exceed '+(maxFilesize/MB).toFixed(2)+' MB!'}}
   } else {return {error:'NO FILE. NO UPLOAD.'}}
 }
 function findFile(md5) {return files.find((f)=>{return f.md5==md5})}
-function deleteFile(md5) {let file=files.find((f)=>{return f.md5==md5}); if (file) {files=files.filter((f)=>{return f.md5!==md5}); hook.trigger('[QCKSHR] DELETE',file);}}
+function deleteFile(md5,afterdownload) {let file=files.find((f)=>{return f.md5==md5}); if (file) {files=files.filter((f)=>{return f.md5!==md5}); hook.trigger(''+(afterdownload?'DOWNLOAD':'DELETE'),file);}}
 function getObjWithoutData(o) {return {name:o.name,size:o.size,mimetype:o.mimetype,md5:o.md5,idle:new Date().getTime()-o.time}}
 function getSize() {return files.reduce((a,c)=>{return a+c.size},0)}
