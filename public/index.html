@@ -16,6 +16,7 @@
 		.bignumber {font-weight:bold; font-size:2rem; padding-bottom:0.5rem; color:#3e3e3e;}
 		.hint {font-size:0.8rem;margin-top:0.25rem}
 		#response {background-color:#aee1ff; margin:1.5rem 0 1.5rem 0; padding:2rem; text-align:center; display:none;}
+		#incoming {background-color:#ffffff; margin:1.5rem 0 1.5rem 0; padding:0.5rem 1rem 0.5rem 1rem; font-size:0.8rem; display:none;}
 		a.biglink {font-weight:bold;font-size:1.2rem}
 		div.biglink {margin:1rem 0 0.5rem 0;}
 		#info {background-color:#f2f2f2;margin:1.5rem 0 1.5rem 0;}
@@ -57,7 +58,17 @@
 				socket.on('connect', function () {socket.emit('join',socketData.qckshr_rooms); console.log('===SOCKET CONNECTED===');});
 				socket.on('message', function (msg,meta) {
 					console.log(msg);
-					if (meta) {updateInfo()};
+					if (meta) {
+						if ( msg.startsWith('UPLOAD') || msg.startsWith('DOWNLOAD') || msg.startsWith('DELETE') ) {
+							updateInfo()
+						} else {
+							if (msg.startsWith('INCOMING')) {
+								let e=document.getElementById('incoming');
+								e.innerHTML=msg;
+								e.style.display='block';
+							}
+						}
+					};
 				});
 				socket.on('disconnect', function (msg) {console.log('===SOCKET CONNECTION CLOSED===')})
 			} else {console.log('===SOCKET FAILED===');}
@@ -72,9 +83,8 @@
 		}
 
 		function uploadXHR() {
-			if (socketData.socketLoaded==true) {socket.emit('message','INCOMING',{rooms:socketData.qckshr_rooms})};
 			let filename=/([^\\]+)$/g.exec(uploadform.share.value)[1];
-			update();
+			if (socketData.socketLoaded==true) {socket.emit('message','INCOMING: '+filename,{rooms:socketData.qckshr_rooms})};
 			progress(0,filename);
 			var xhr = new XMLHttpRequest();
 	        if ( xhr.upload ) {
@@ -129,6 +139,7 @@
 				if (!socketData.socketLoaded && r.socket_server_URL!==undefined && r.qckshr_rooms!==undefined) {SocketIO(r.socket_server_URL,r.qckshr_rooms)}
 				maxFilesize=r.maxFilesize||0;
 				document.getElementById('dropContainer').innerHTML='click or drag &amp; drop<br>your file here<div class=hint><br>maximum filesize '+(maxFilesize/MB).toFixed(0)+'MB</div>';
+				document.getElementById('incoming').style.display='none';
 				document.getElementById('info').innerHTML=r.filelist.reverse().reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
 			})
 		}
@@ -158,6 +169,7 @@
 		<div id=dropContainer onclick="document.getElementById('share').click()">click or drag &amp; drop<br>your file here</div>
 		<div id=response></div>
 		<div id=info></div>
+		<div id=incoming></div>
 	</div>
 	<form method="post" encType="multipart/form-data" id="uploadform" name="uploadform"><input id="share" type="file" name="file"></form>
 	<script type="text/javascript">document.getElementById('share').addEventListener('change', function(f) {uploadXHR()}, false);</script>
