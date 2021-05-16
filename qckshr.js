@@ -2,11 +2,11 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const app = express();
 const path = require('path');
-const PORT = 3011;
 const MB=1024*1024;
 const maxDBsize=150*MB;
 const maxFilesize=100*MB;
 var config = require('./config.json'); config=config||{};
+var PORT = config.PORT||3000;
 const Hook = require('./hook.js');
 var hook = new Hook(config);
 
@@ -26,7 +26,7 @@ app.use('(/qckshr)?/:id', function(req, res) {
     hook.trigger('[QCKSHR] DOWNLOAD',f);
   } else {res.status(404).send('File not found');}
 })
-app.listen(PORT, function() {console.log('QCKSHR* listening on port', PORT)});
+app.listen(PORT, function() {console.log('QCKSHR* listening on port '+PORT)});
 
 var files = [];
 function addFile(req) {
