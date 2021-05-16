@@ -90,7 +90,7 @@
 
 		function update(response) {
 			updateResponse(response);
-			if (!socket) {updateInfo()};
+			if (!socket || (socket&&!socket.connected)) {updateInfo()};
 		}
 
 		function updateResponse(r) {
