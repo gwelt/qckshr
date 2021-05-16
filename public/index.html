@@ -72,6 +72,7 @@
 		}
 
 		function uploadXHR() {
+			if (socketData.socketLoaded==true) {socket.emit('message','INCOMING',{rooms:socketData.qckshr_rooms})};
 			let filename=/([^\\]+)$/g.exec(uploadform.share.value)[1];
 			update();
 			progress(0,filename);
