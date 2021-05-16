@@ -101,12 +101,14 @@
 			setTimeout(function(){
 				SocketIO(); // has to be reconnected after a href-download (bug?)
 				update();
-			},500)
+			},500);
+			return true;
 		}
 
 		function update(response) {
 			updateResponse(response);
 			updateInfo();
+			return true;
 		}
 
 		function updateResponse(r) {
@@ -135,7 +137,7 @@
 		}
 
 		function deleteFile(md5) {
-			ajax('delete/'+md5,(r)=>{update()})
+			ajax('delete/'+md5,(r)=>{update()});
 			return true;
 		}
 
