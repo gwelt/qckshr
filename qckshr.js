@@ -6,13 +6,14 @@ const PORT = 3011;
 const MB=1024*1024;
 const maxDBsize=150*MB;
 const maxFilesize=100*MB;
+var config = require('./config.json'); config=config||{};
 const Hook = require('./hook.js');
-var hook = new Hook();
+var hook = new Hook(config);
 
 app.use(fileUpload({limits:{fileSize:maxFilesize+1}}));
 app.use('(/qckshr)?/', express.static(__dirname + '/public'));
 app.post('(/qckshr)?/', function(req, res) {res.send(addFile(req))});
-app.use('(/qckshr)?/info', function(req, res) {let filelist=files.map((f)=>{return getObjWithoutData(f)}); res.send({maxFilesize:maxFilesize,filelist:filelist}); });
+app.use('(/qckshr)?/info', function(req, res) {let filelist=files.map((f)=>{return getObjWithoutData(f)}); res.send({maxFilesize:maxFilesize,socket_server_URL:config.socket_server_URL,qckshr_rooms:config.qckshr_rooms,filelist:filelist}); });
 app.use('(/qckshr)?/EMP', function(req, res) {files=[]; res.send('EMP succeeded!')})
 app.use('(/qckshr)?/delete/:id', function(req, res) {let f=findFile(req.params.id); if (f) {deleteFile(f.md5); res.send('OK')} else {res.status(404).send('File not found');}})
 app.use('(/qckshr)?/:id', function(req, res) {

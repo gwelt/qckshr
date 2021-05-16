@@ -12,10 +12,10 @@
 		div {border-radius:0.4rem;}
 		img {height:1.2rem;border-style:none;}
 		#main {min-width:300px; max-width:800px;margin:auto;word-break:break-word;padding:1rem;}
-		#dropContainer {font-weight:bold; cursor:pointer; border:4px dashed #5e5e5e; padding:2rem; text-align:center;}
+		#dropContainer {font-weight:bold; cursor:pointer; border:4px dashed #b3b3b3; padding:2rem; text-align:center; background-color:#ffffff}
 		.bignumber {font-weight:bold; font-size:2rem; padding-bottom:0.5rem; color:#3e3e3e;}
 		.hint {font-size:0.8rem;margin-top:0.25rem}
-		#response {background-color:#aee1ff; margin:1.5rem 0 1.5rem 0; padding:2rem; text-align:center}
+		#response {background-color:#aee1ff; margin:1.5rem 0 1.5rem 0; padding:2rem; text-align:center; display:none;}
 		a.biglink {font-weight:bold;font-size:1.2rem}
 		div.biglink {margin:1rem 0 0.5rem 0;}
 		#info {background-color:#f2f2f2;margin:1.5rem 0 1.5rem 0;}
@@ -28,15 +28,11 @@
 			* {font-size: 1.1rem}
 		}
 	</style>
-	<script type="text/javascript" src="index.config.json"></script>
 	<script type="text/javascript">
 		const MB=1024*1024;
 		var maxFilesize=0;
 
 		document.addEventListener("visibilitychange", function() {if (!document.hidden) {updateInfo()}});
-
-		var socket=false;
-		var useSocketIO=true;
 
 		function loadScript(src, done) {
 			var js = document.createElement('script');
@@ -45,15 +41,14 @@
 			document.head.appendChild(js);
 		}
 
-		if (useSocketIO) {setTimeout(function(){SocketIO()},0)};
-		function SocketIO() {
-			var config = JSON.parse(configJSON);
-			if (!socket) {loadScript(config.socket_server_URL+'/socket.io/socket.io.js', function() {
-				socket=io(config.socket_server_URL);
-				socket.on('connect', function () {socket.emit('join',['qckshr'])});
+		var socket=false;
+		function SocketIO(socket_server_URL,qckshr_rooms) {
+			if (!socket) {loadScript(socket_server_URL+'/socket.io/socket.io.js', function() {
+				socket=io(socket_server_URL);
+				socket.on('connect', function () {socket.emit('join',qckshr_rooms)});
 				socket.on('message', function (msg,meta) {
-					console.log(msg);
-					updateInfo();
+					console.log(msg,meta);
+					if (meta) {updateInfo()};
 				});
 				socket.on('disconnect', function (msg) {console.log('CONNECTION CLOSED')})
 			})
@@ -95,7 +90,7 @@
 
 		function update(response) {
 			updateResponse(response);
-			updateInfo();
+			if (!socket) {updateInfo()};
 		}
 
 		function updateResponse(r) {
@@ -112,12 +107,11 @@
 			document.getElementById('info').innerHTML='';
 			ajax('info',(r)=>{
 				r=JSON.parse(r);
+				console.log(r);
+				if (!socket && r.socket_server_URL!==undefined && r.qckshr_rooms!==undefined) {SocketIO(r.socket_server_URL,r.qckshr_rooms)}
 				maxFilesize=r.maxFilesize||0;
+				document.getElementById('dropContainer').innerHTML='click or drag &amp; drop<br>your file here<div class=hint><br>maximum filesize '+(maxFilesize/MB).toFixed(0)+'MB</div>';
 				document.getElementById('info').innerHTML=r.filelist.reverse().reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
-				let dc=document.getElementById('dropContainer');
-				dc.innerHTML='click or drag &amp; drop<br>your file here<div class=hint><br>maximum filesize '+(maxFilesize/MB).toFixed(0)+'MB</div>';
-				dc.style.backgroundColor='#ffffff';
-				dc.style.border='4px dashed #b3b3b3';
 			})
 		}
 
@@ -136,22 +130,17 @@
 		}
 
 		function progress(p,filename) {
-			let e=document.getElementById('dropContainer');
-			e.style.backgroundColor='#ffffff';
-			e.style.border='0px';
-			e.innerHTML='<div class=bignumber>'+p.toFixed(0)+'%</div>'+filename;
+			document.getElementById('dropContainer').innerHTML='<div class=bignumber>'+p.toFixed(0)+'%</div>'+filename;
 		}
 
 	</script>
 </head>
-<body onload=updateResponse()>
-	
+<body onload=updateInfo()>
 	<div id=main>
-		<div id="dropContainer" onclick="document.getElementById('share').click()"></div>
+		<div id=dropContainer onclick="document.getElementById('share').click()">click or drag &amp; drop<br>your file here</div>
 		<div id=response></div>
 		<div id=info></div>
 	</div>
-
 	<form method="post" encType="multipart/form-data" id="uploadform" name="uploadform"><input id="share" type="file" name="file"></form>
 	<script type="text/javascript">document.getElementById('share').addEventListener('change', function(f) {uploadXHR()}, false);</script>
 	<script type="text/javascript">
@@ -162,7 +151,6 @@
 		  evt.preventDefault();
 		};
 	</script>
-
 </body>
 </html>
 
