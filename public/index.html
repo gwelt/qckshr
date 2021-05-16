@@ -20,7 +20,7 @@
 		a.biglink {font-weight:bold;font-size:1.2rem}
 		div.biglink {margin:1rem 0 0.5rem 0;}
 		#info {background-color:#f2f2f2;margin:1.5rem 0 1.5rem 0;}
-		.fileitem {background-color:#ffffff;margin:0.75rem 0 0.75rem 0;padding:0;width:100%;display:flex;justify-content:flex-start;}
+		.fileitem {min-height:4.4rem;background-color:#ffffff;margin:0.75rem 0 0.75rem 0;padding:0;width:100%;display:flex;justify-content:flex-start;}
 		.filedescription {padding:1rem; margin-right:0; width:100%}
 		.actionicon {cursor:pointer; min-width:15%; padding:2rem; border-radius:0 0.4rem 0.4rem 0; background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNOSAxOWMwIC41NTItLjQ0OCAxLTEgMXMtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMXMxIC40NDggMSAxdjEwem00IDBjMCAuNTUyLS40NDggMS0xIDFzLTEtLjQ0OC0xLTF2LTEwYzAtLjU1Mi40NDgtMSAxLTFzMSAuNDQ4IDEgMXYxMHptNCAwYzAgLjU1Mi0uNDQ4IDEtMSAxcy0xLS40NDgtMS0xdi0xMGMwLS41NTIuNDQ4LTEgMS0xczEgLjQ0OCAxIDF2MTB6bTUtMTd2MmgtMjB2LTJoNS43MTFjLjkgMCAxLjYzMS0xLjA5OSAxLjYzMS0yaDUuMzE1YzAgLjkwMS43MyAyIDEuNjMxIDJoNS43MTJ6bS0zIDR2MTZoLTE0di0xNmgtMnYxOGgxOHYtMThoLTJ6Ii8+PC9zdmc+") no-repeat center;}
 		.actionicon:hover {background-color:#ff8686;}
@@ -133,14 +133,13 @@
 		}
 
 		function updateInfo() {
-			document.getElementById('info').innerHTML='';
 			ajax('info',(r)=>{
 				r=JSON.parse(r);
 				if (!socketData.socketLoaded && r.socket_server_URL!==undefined && r.qckshr_rooms!==undefined) {SocketIO(r.socket_server_URL,r.qckshr_rooms)}
 				maxFilesize=r.maxFilesize||0;
 				document.getElementById('dropContainer').innerHTML='click or drag &amp; drop<br>your file here<div class=hint><br>maximum filesize '+(maxFilesize/MB).toFixed(0)+'MB</div>';
 				document.getElementById('incoming').style.display='none';
-				document.getElementById('info').innerHTML=r.filelist.reverse().reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
+				document.getElementById('info').innerHTML=r.filelist.reduce((a,c)=>{return a+getFileDetailsHTML(c)},'');
 			})
 		}
 
